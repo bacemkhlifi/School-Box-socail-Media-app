@@ -18,61 +18,67 @@ class _SignupScreenState extends State<SignupScreen> {
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _fullNameController = TextEditingController(); // New controller for full name
 
   Future<void> _signUp() async {
-  try {
-    // Set isLoading to true when starting signup
-    setState(() {
-      isLoading = true;
-    });
+    try {
+      // Set isLoading to true when starting signup
+      setState(() {
+        isLoading = true;
+      });
 
-    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-    );
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
 
-    // Store additional user information in Firestore
-    await _storeUserData(userCredential.user);
+      // Store additional user information in Firestore, including full name
+      await _storeUserData(userCredential.user);
 
-    print('Signup successful');
+      print('Signup successful');
 
-    // Navigate to the home screen
-    Get.off(HomeScreen());
-  } catch (e) {
-    // Handle signup errors
-    print('Signup Error: $e');
-    
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Signup Error'),
-          content: Text('$e'.split("]")[1]),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  } finally {
-    // Set isLoading to false regardless of success or failure
-    setState(() {
-      isLoading = false;
-    });
+      // Navigate to the home screen
+      Get.off(HomeApp());
+    } catch (e) {
+      // Handle signup errors
+      print('Signup Error: $e');
+      
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Signup Error'),
+            content: Text('$e'.split("]")[1]),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } finally {
+      // Set isLoading to false regardless of success or failure
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
-}
-
 
   Future<void> _storeUserData(User? user) async {
     if (user != null) {
-      // Add user data to Firestore
+      // Add user data to Firestore, including full name
       await _firestore.collection('users').doc(user.uid).set({
         'email': user.email,
+        'full_name': _fullNameController.text, // Use entered full name
+        'posts': 0,
+        'followers': 0,
+        'following': 0,
+        'bio': 'Bio or description here',
+        'profile_picture': '',
         // Add more user data as needed
       });
     }
@@ -84,11 +90,16 @@ class _SignupScreenState extends State<SignupScreen> {
       appBar: AppBar(
         title: Text('Signup'),
       ),
-      body: !isLoading ?Padding(
+      body: !isLoading ? Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            TextField(
+              controller: _fullNameController, // New TextField for full name
+              decoration: InputDecoration(labelText: 'Full Name'),
+            ),
+            SizedBox(height: 16),
             TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
@@ -107,15 +118,14 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             TextButton(
               onPressed: () {
-                // Navigate to the signup screen
+                // Navigate to the login screen
                 Get.to(LoginScreen());
               },
               child: Text('Do you have an account? Login'),
             ),
           ],
         ),
-      ):   Center(child: CircularProgressIndicator()),
+      ) : Center(child: CircularProgressIndicator()),
     );
   }
 }
-

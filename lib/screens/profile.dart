@@ -1,28 +1,115 @@
-// lib/features/profile/profile_screen.dart
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+ 
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final ImagePicker _imagePicker = ImagePicker();
+
+  late User _user;
+  late Map<String, dynamic> _userData = {};
+  final TextEditingController _bioController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _user = _auth.currentUser!;
+    _loadUserData();
+    
+  }
+
+  Future<void> _loadUserData() async {
+    DocumentSnapshot userSnapshot =
+        await _firestore.collection('users').doc(_user.uid).get();
+
+    setState(() {
+      _userData = userSnapshot.data() as Map<String, dynamic>;
+      _bioController.text = _userData['bio'] ?? '';
+    });
+  }
+
+  Future<void> _updateBio(String newBio) async {
+    await _firestore.collection('users').doc(_user.uid).update({
+      'bio': newBio,
+    });
+    _loadUserData();
+  }
+  
+Future<void> _updateProfilePicture() async {
+  final XFile? pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+
+  if (pickedFile != null) {
+    try {
+      // Upload the image to Firebase Storage
+      String imagePath = 'profile_pictures/${_user.uid}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      
+      UploadTask uploadTask = FirebaseStorage.instance.ref().child(imagePath).putFile(File(pickedFile.path));
+
+      // Use FutureBuilder to listen for completion and handle UI accordingly
+      await uploadTask.whenComplete(() async {
+        // Get the download URL of the uploaded image
+        String downloadURL = await FirebaseStorage.instance.ref(imagePath).getDownloadURL();
+
+        // Update the user's Firestore document with the image URL
+        await _firestore.collection('users').doc(_user.uid).update({
+          'profile_picture': downloadURL,
+        });
+
+        // Reload user data to reflect the changes
+        _loadUserData();
+      });
+    } catch (e) {
+      print('Error uploading image: $e');
+    }
+  }
+}
+
   @override
   Widget build(BuildContext context) {
-    return  Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 40,
-                // Replace with user's profile picture
-                backgroundImage: AssetImage('assets/profile.jpg'),
-              ),
+           GestureDetector(
+  onTap: () async {
+    // Call the method to update the profile picture
+    await _updateProfilePicture();
+
+    // Reload user data to reflect changes
+    _loadUserData();
+  },
+  child: CircleAvatar(
+    radius: 40,
+    // Use the user's profile picture from the loaded data
+    backgroundImage: _userData['profile_picture'] != null
+        ? NetworkImage(_userData!['profile_picture'] as String)
+        : const AssetImage('assets/profile.jpg') as ImageProvider<Object>,
+  ),
+),
+
+
+
+
               SizedBox(width: 16),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Your Full Name',
+                    _userData['full_name'] ?? 'Your Full Name',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -34,7 +121,7 @@ class ProfileScreen extends StatelessWidget {
                       Column(
                         children: [
                           Text(
-                            '10', // Replace with actual number of posts
+                            _userData['posts']?.toString() ?? '0',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -47,7 +134,7 @@ class ProfileScreen extends StatelessWidget {
                       Column(
                         children: [
                           Text(
-                            '100', // Replace with actual number of followers
+                            _userData['followers']?.toString() ?? '0',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -60,7 +147,7 @@ class ProfileScreen extends StatelessWidget {
                       Column(
                         children: [
                           Text(
-                            '50', // Replace with actual number of following
+                            _userData['following']?.toString() ?? '0',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -73,17 +160,27 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ],
               ),
+            
             ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            'Bio or description here', // Replace with the user's bio
-            style: TextStyle(
-              fontSize: 16,
-            ),
-          ),
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                _userData['bio'] ?? 'Bio or description here',
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+            ),IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () {
+                  _showEditBioBottomSheet(context);
+                },
+              ),
+          ],
         ),
         SizedBox(height: 36),
         // Add a grid of user's publications (photos) here
@@ -104,11 +201,50 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+
+
   Widget buildPublication(int index) {
     // Placeholder function for building a publication widget
     return Container(
       color: Colors.grey, // Replace with the actual image or data
       margin: EdgeInsets.all(4),
+    );
+  }
+
+  void _showEditBioBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  controller: _bioController,
+                  maxLength: 30,
+                  decoration: const InputDecoration(
+                    labelText: 'Edit Bio',
+                    hintText: 'Enter your bio (max 30 characters)',
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  _updateBio(_bioController.text);
+                  Navigator.pop(context);
+                },
+                child:const Text('Update'),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -2,6 +2,7 @@
 
 import 'package:blackbox/screens/profile.dart';
 import 'package:blackbox/screens/search.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,6 +20,28 @@ class HomeApp extends StatefulWidget {
 class _HomeAppState extends State<HomeApp> {
   int _currentIndex = 0; // Store the current index
    final FirebaseAuth _auth = FirebaseAuth.instance;
+
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  late User _user;
+  late Map<String, dynamic>  _userData = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _user = _auth.currentUser!;
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    DocumentSnapshot userSnapshot =
+        await _firestore.collection('users').doc(_user.uid).get();
+
+    setState(() {
+      _userData = userSnapshot.data() as Map<String, dynamic>;
+    });
+  }
 
   Future<void> _logout() async {
     try {
@@ -47,7 +70,13 @@ final List<Widget> _screens = [
         title:const  Text('SchoolBox'),
         actions: [
           IconButton(
-            icon:const Icon(Icons.person),
+            icon:const Icon(Icons.favorite_border),
+            onPressed: () {
+              // Handle the action when the person icon is pressed
+            },
+          ),
+          IconButton(
+            icon:const Icon(Icons.chat),
             onPressed: () {
               // Handle the action when the person icon is pressed
             },
@@ -58,8 +87,8 @@ final List<Widget> _screens = [
         child: ListView(
           children: [
             UserAccountsDrawerHeader(
-              accountName: Text('User Name'), // Replace with user's name
-              accountEmail: Text('user@example.com'), // Replace with user's email
+              accountName: Text(_userData['full_name'] ?? 'username'), // Replace with user's name
+              accountEmail: Text(_userData['email'] ?? 'user@schoolbox.com'), // Replace with user's email
               currentAccountPicture: CircleAvatar(
                 // You can load the user's profile picture here
                 backgroundImage: AssetImage('assets/profile_picture.jpg'),
