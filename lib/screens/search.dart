@@ -36,7 +36,7 @@ class SearchScreen extends StatelessWidget {
     return ListTile(
       leading: CircleAvatar(
         // Replace with user's profile picture
-        backgroundImage: AssetImage('assets/profile_picture.jpg'),
+        backgroundImage: AssetImage('assets/profile.jpg'),
       ),
       title: Text('Search Result $index'),
       subtitle: Text('Subtitle or additional information'),

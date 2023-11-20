@@ -1,4 +1,5 @@
 
+import 'package:blackbox/screens/login.dart';
 import 'package:blackbox/screens/signUp.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: SignupScreen(),
+      home: LoginScreen(),
     );
   }
 }

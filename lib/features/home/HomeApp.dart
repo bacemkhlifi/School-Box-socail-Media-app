@@ -2,9 +2,12 @@
 
 import 'package:blackbox/screens/profile.dart';
 import 'package:blackbox/screens/search.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../screens/addPosteScreen.dart';
+import '../../screens/login.dart';
 import 'homeScreen.dart';
 
 
@@ -15,6 +18,21 @@ class HomeApp extends StatefulWidget {
 
 class _HomeAppState extends State<HomeApp> {
   int _currentIndex = 0; // Store the current index
+   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> _logout() async {
+    try {
+      await _auth.signOut();
+      print('Logout successful');
+
+      // Navigate to the login screen
+      Get.offAll(LoginScreen());
+    } catch (e) {
+      // Handle logout errors
+      print('Logout Error: $e');
+      // You can show an error message to the user if needed
+    }
+  }
  
 final List<Widget> _screens = [
     HomeScreen(), 
@@ -35,6 +53,25 @@ final List<Widget> _screens = [
             },
           ),
         ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: Text('User Name'), // Replace with user's name
+              accountEmail: Text('user@example.com'), // Replace with user's email
+              currentAccountPicture: CircleAvatar(
+                // You can load the user's profile picture here
+                backgroundImage: AssetImage('assets/profile_picture.jpg'),
+              ),
+            ),
+            ListTile(
+              title: Text('Logout'),
+              leading: Icon(Icons.logout),
+              onTap: _logout,
+            ),
+          ],
+        ),
       ),
       body:  IndexedStack(
         index: _currentIndex,

@@ -33,7 +33,7 @@ class HomeScreen extends StatelessWidget {
         children: [
           ListTile(
             leading: CircleAvatar(
-              backgroundImage: AssetImage('assets/profile_picture.jpg'),
+              backgroundImage: AssetImage('assets/profile.jpg'),
             ),
             title: Text(post.userName),
           ),

@@ -1,52 +1,48 @@
 import 'package:blackbox/features/home/HomeApp.dart';
-import 'package:blackbox/features/home/homeScreen.dart';
-import 'package:blackbox/screens/login.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'signUp.dart';
 
-class SignupScreen extends StatefulWidget {
+class LoginScreen extends StatefulWidget {
   @override
-  _SignupScreenState createState() => _SignupScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
-  bool isLoading = false;
+class _LoginScreenState extends State<LoginScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool isLoading = false;
 
   final TextEditingController _emailController = TextEditingController();
+
   final TextEditingController _passwordController = TextEditingController();
 
-  Future<void> _signUp() async {
+  Future<void> _login() async {
   try {
-    // Set isLoading to true when starting signup
+    // Show loading indicator
     setState(() {
       isLoading = true;
     });
 
-    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+    UserCredential userCredential = await _auth.signInWithEmailAndPassword(
       email: _emailController.text.trim(),
       password: _passwordController.text,
     );
 
-    // Store additional user information in Firestore
-    await _storeUserData(userCredential.user);
-
-    print('Signup successful');
+    print('Login successful');
 
     // Navigate to the home screen
-    Get.off(HomeScreen());
+    Get.off(HomeApp());
   } catch (e) {
-    // Handle signup errors
-    print('Signup Error: $e');
+    // Handle login errors
+    print('Login Error: $e');
     
+    // Show error message in AlertDialog
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Signup Error'),
+          title: Text('Login Error'),
           content: Text('$e'.split("]")[1]),
           actions: [
             TextButton(
@@ -60,31 +56,20 @@ class _SignupScreenState extends State<SignupScreen> {
       },
     );
   } finally {
-    // Set isLoading to false regardless of success or failure
+    // Hide loading indicator
     setState(() {
       isLoading = false;
     });
   }
 }
 
-
-  Future<void> _storeUserData(User? user) async {
-    if (user != null) {
-      // Add user data to Firestore
-      await _firestore.collection('users').doc(user.uid).set({
-        'email': user.email,
-        // Add more user data as needed
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Signup'),
+        title: Text('Login'),
       ),
-      body: !isLoading ?Padding(
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -102,20 +87,20 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             SizedBox(height: 32),
             ElevatedButton(
-              onPressed: _signUp,
-              child: Text('Sign Up'),
+              onPressed: _login,
+              child: Text('Login'),
             ),
+            SizedBox(height: 16),
             TextButton(
               onPressed: () {
                 // Navigate to the signup screen
-                Get.to(LoginScreen());
+                Get.to(SignupScreen());
               },
-              child: Text('Do you have an account? Login'),
+              child: Text('Don\'t have an account? Sign up'),
             ),
           ],
         ),
-      ):   Center(child: CircularProgressIndicator()),
+      ),
     );
   }
 }
-
