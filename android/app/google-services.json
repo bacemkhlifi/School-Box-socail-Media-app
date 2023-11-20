@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "444440830371",
+    "project_id": "shcool-box",
+    "storage_bucket": "shcool-box.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444440830371:android:0e0cdecbb48b44d3d47a16",
+        "android_client_info": {
+          "package_name": "com.example.blackbox"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtjXXCwoHVbhRRVyKxCcXQv_2X1GoD6aM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
