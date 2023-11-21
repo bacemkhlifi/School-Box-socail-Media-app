@@ -7,6 +7,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'data/services/theme_services.dart';
+import 'widgets/theme.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -35,10 +38,9 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+     theme: Themes.light,
+      darkTheme: Themes.dark,
+      themeMode: ThemeServices().theme,
       home:FutureBuilder(
         future: _auth.authStateChanges().first,
         builder: (context, AsyncSnapshot<User?> snapshot) {

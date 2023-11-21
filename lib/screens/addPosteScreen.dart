@@ -23,7 +23,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
       });
       print('Post added successfully');
       // Navigate back to the previous screen or perform any desired action
-      Get.to(HomeApp());
+     
     } catch (e) {
       print('Error adding post: $e');
     }
@@ -71,6 +71,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
                 if (text.isNotEmpty) {
                   savePost(userId, userName, text);
+                   Get.to(HomeApp());
                 } else {
                   // Show an error message or handle empty caption
                   print('Caption is empty');

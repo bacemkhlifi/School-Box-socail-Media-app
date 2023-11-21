@@ -1,4 +1,4 @@
-// lib/features/home/home_screen.dart
+
 
 import 'package:blackbox/screens/profile.dart';
 import 'package:blackbox/screens/search.dart';
@@ -7,8 +7,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../data/services/theme_services.dart';
 import '../../screens/addPosteScreen.dart';
 import '../../screens/login.dart';
+import '../../screens/messagingScreen.dart';
+import '../../widgets/theme.dart';
 import 'homeScreen.dart';
 
 
@@ -70,6 +73,15 @@ final List<Widget> _screens = [
         title:const  Text('SchoolBox'),
         actions: [
           IconButton(
+          color: Get.isDarkMode ? primaryClr : darkGreyClr,
+          onPressed: () {
+            ThemeServices().switchTheme();
+          },
+          icon: Icon(
+            Get.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+            size: 24,
+          )),
+          IconButton(
             icon:const Icon(Icons.favorite_border),
             onPressed: () {
               // Handle the action when the person icon is pressed
@@ -78,7 +90,7 @@ final List<Widget> _screens = [
           IconButton(
             icon:const Icon(Icons.chat),
             onPressed: () {
-              // Handle the action when the person icon is pressed
+              Get.to(ChatScreen(userId:_user.uid,));
             },
           ),
         ],
@@ -109,7 +121,7 @@ final List<Widget> _screens = [
      bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         backgroundColor:Colors.purple,
-        selectedItemColor:Colors.black,
+        selectedItemColor:Get.isDarkMode? primaryClr: Colors.black,
         unselectedItemColor:Colors.grey,
         items: const [
           BottomNavigationBarItem(

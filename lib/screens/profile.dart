@@ -77,127 +77,129 @@ Future<void> _updateProfilePicture() async {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-           GestureDetector(
-  onTap: () async {
-    // Call the method to update the profile picture
-    await _updateProfilePicture();
-
-    // Reload user data to reflect changes
-    _loadUserData();
-  },
-  child: CircleAvatar(
-    radius: 40,
-    // Use the user's profile picture from the loaded data
-    backgroundImage: _userData['profile_picture'] != null
-        ? NetworkImage(_userData!['profile_picture'] as String)
-        : const AssetImage('assets/profile.jpg') as ImageProvider<Object>,
-  ),
-),
-
-
-
-
-              SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _userData['full_name'] ?? 'Your Full Name',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+             GestureDetector(
+      onTap: () async {
+      // Call the method to update the profile picture
+      await _updateProfilePicture();
+    
+      // Reload user data to reflect changes
+      _loadUserData();
+      },
+      child: CircleAvatar(
+      radius: 40,
+      // Use the user's profile picture from the loaded data
+      backgroundImage: _userData['profile_picture'] != null
+          ? NetworkImage(_userData!['profile_picture'] as String)
+          : const AssetImage('assets/profile.jpg') as ImageProvider<Object>,
+      ),
+    ),
+    
+    
+    
+    
+                SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _userData['full_name'] ?? 'Your Full Name',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              _userData['posts']?.toString() ?? '0',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text('Posts'),
+                          ],
+                        ),
+                        SizedBox(width: 16),
+                        Column(
+                          children: [
+                            Text(
+                              _userData['followers']?.toString() ?? '0',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text('Followers'),
+                          ],
+                        ),
+                        SizedBox(width: 16),
+                        Column(
+                          children: [
+                            Text(
+                              _userData['following']?.toString() ?? '0',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text('Following'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  _userData['bio'] ?? 'Bio or description here',
+                  style: TextStyle(
+                    fontSize: 16,
                   ),
-                  SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Column(
-                        children: [
-                          Text(
-                            _userData['posts']?.toString() ?? '0',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text('Posts'),
-                        ],
-                      ),
-                      SizedBox(width: 16),
-                      Column(
-                        children: [
-                          Text(
-                            _userData['followers']?.toString() ?? '0',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text('Followers'),
-                        ],
-                      ),
-                      SizedBox(width: 16),
-                      Column(
-                        children: [
-                          Text(
-                            _userData['following']?.toString() ?? '0',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text('Following'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            
+                ),
+              ),IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: () {
+                    _showEditBioBottomSheet(context);
+                  },
+                ),
             ],
           ),
-        ),
-        Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                _userData['bio'] ?? 'Bio or description here',
-                style: TextStyle(
-                  fontSize: 16,
-                ),
-              ),
-            ),IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () {
-                  _showEditBioBottomSheet(context);
-                },
-              ),
-          ],
-        ),
-        SizedBox(height: 36),
-        // Add a grid of user's publications (photos) here
-        // You can use GridView.builder to display a dynamic grid of images
-        // Replace the placeholder 'buildPublication' function with your implementation
-        GridView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3, // Adjust the number of columns as needed
+          SizedBox(height: 36),
+          // Add a grid of user's publications (photos) here
+          // You can use GridView.builder to display a dynamic grid of images
+          // Replace the placeholder 'buildPublication' function with your implementation
+          GridView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3, // Adjust the number of columns as needed
+            ),
+            itemCount: 9, // Replace with the actual number of user's publications
+            itemBuilder: (context, index) {
+              return buildPublication(index);
+            },
           ),
-          itemCount: 9, // Replace with the actual number of user's publications
-          itemBuilder: (context, index) {
-            return buildPublication(index);
-          },
-        ),
-      ],
+        ],
+      ),
     );
   }
 
