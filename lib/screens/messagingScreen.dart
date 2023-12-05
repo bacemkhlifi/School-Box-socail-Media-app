@@ -25,7 +25,7 @@ class ChatScreen extends StatelessWidget {
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
+            return const  Center(
               child: Text('No chats available. Start a new chat!'),
             );
           } else {
