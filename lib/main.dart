@@ -1,6 +1,6 @@
 
 import 'package:blackbox/features/home/HomeApp.dart';
-import 'package:blackbox/screens/login.dart';
+import 'package:blackbox/screens/SignUpIn/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -13,6 +13,7 @@ import 'widgets/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  //await Firebase.initializeApp();
   GetStorage.init();
 
   try {

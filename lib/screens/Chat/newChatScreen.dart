@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../data/services/chat_service.dart';
+import '../../data/services/chat_service.dart';
 import 'chatDetails.dart';
 
 class NewChatScreen extends StatefulWidget {
@@ -25,10 +25,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   Future<void> fetchUserList() async {
     try {
-      // Implement logic to fetch the list of users from Firestore
-      // Example: userList = await chatService.fetchUserList();
-      // Replace 'users' with your actual Firestore collection name
-
+     
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('users').get();
       setState(() {
        userList = querySnapshot.docs

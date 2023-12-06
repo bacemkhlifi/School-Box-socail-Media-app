@@ -1,10 +1,12 @@
 import 'package:blackbox/features/home/HomeApp.dart';
 import 'package:blackbox/features/home/homeScreen.dart';
-import 'package:blackbox/screens/login.dart';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+
+import 'login.dart';
 
 class SignupScreen extends StatefulWidget {
   @override

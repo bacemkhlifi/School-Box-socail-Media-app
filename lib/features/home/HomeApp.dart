@@ -8,9 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../data/services/theme_services.dart';
+import '../../screens/SignUpIn/login.dart';
 import '../../screens/addPosteScreen.dart';
-import '../../screens/login.dart';
-import '../../screens/messagingScreen.dart';
+import '../../screens/Chat/messagingScreen.dart';
 import '../../widgets/theme.dart';
 import 'homeScreen.dart';
 
