@@ -2,7 +2,7 @@ class Post {
   final String userId;
   final String userName;
   final String text;
-  final int likes;
+  final List<String> likes;
 
   Post({
     required this.userId,

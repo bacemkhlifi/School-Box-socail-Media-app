@@ -1,14 +1,16 @@
 
 
+import 'package:badges/badges.dart';
 import 'package:blackbox/screens/profile.dart';
 import 'package:blackbox/screens/search.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:badges/badges.dart' as badges;
 import '../../data/services/theme_services.dart';
 import '../../screens/SignUpIn/login.dart';
+import '../../screens/activitiesScreen.dart';
 import '../../screens/addPosteScreen.dart';
 import '../../screens/Chat/messagingScreen.dart';
 import '../../widgets/theme.dart';
@@ -84,12 +86,24 @@ class _HomeAppState extends State<HomeApp> {
             Get.isDarkMode ? Icons.light_mode : Icons.dark_mode,
             size: 24,
           )),
-          IconButton(
+           badges.Badge(
+              position: BadgePosition.topEnd(top: 3, end: 18),
+              animationDuration: Duration(milliseconds: 300),
+              animationType: BadgeAnimationType.slide,
+              badgeContent: Text(
+                '?',
+                style: TextStyle(color: Colors.white),
+              ),
+              child: IconButton(
             icon:const Icon(Icons.favorite_border),
+            
             onPressed: () {
-              // Handle the action when the person icon is pressed
+              Get.to(ActivitiesScreen(currentUserId: _user.uid,));
             },
+            
           ),
+            ),
+          
           IconButton(
             icon:const Icon(Icons.chat),
             onPressed: () {
