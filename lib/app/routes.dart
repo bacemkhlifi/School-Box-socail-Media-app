@@ -14,6 +14,6 @@ class AppRoutes {
   static final routes = [
     
     GetPage(name: search, page: () =>  SearchScreen()),
-    GetPage(name: profile, page: () => ProfileScreen()),
+    GetPage(name: profile, page: () => ProfileScreen(userId: '',)),
   ];
 }

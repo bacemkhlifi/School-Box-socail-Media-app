@@ -26,7 +26,7 @@ class _HomeAppState extends State<HomeApp> {
 
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+ late List<Widget> _screens;
   late User _user;
   late Map<String, dynamic>  _userData = {};
 
@@ -35,6 +35,7 @@ class _HomeAppState extends State<HomeApp> {
     super.initState();
     _user = _auth.currentUser!;
     _loadUserData();
+    _initializeScreens();
   }
 
   Future<void> _loadUserData() async {
@@ -60,12 +61,14 @@ class _HomeAppState extends State<HomeApp> {
     }
   }
  
-final List<Widget> _screens = [
-    HomeScreen(), 
-    SearchScreen(),
-    AddPostScreen(),
-    ProfileScreen(),
-  ];
+ void _initializeScreens() {
+    _screens = [
+      HomeScreen(),
+      SearchScreen(),
+      AddPostScreen(),
+      ProfileScreen(userId: _user.uid),
+    ];
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

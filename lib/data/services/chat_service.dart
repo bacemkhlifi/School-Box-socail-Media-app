@@ -35,7 +35,7 @@ final StreamController<List<Chat>> _chatStreamController =
  Future<List<Chat>> getChatsStream(String userId) async {
   List<Chat> chats = [];
 
-  List<String> chatIds = await getChats1(userId);
+  List<String> chatIds = await getChats(userId);
   for (String chatId in chatIds) {
     DocumentSnapshot<Map<String, dynamic>> docSnapshot =
         await FirebaseFirestore.instance.collection('chats').doc(chatId).get();
@@ -72,7 +72,7 @@ final StreamController<List<Chat>> _chatStreamController =
   return chats;
 }
 
-  Future<List<String>> getChats1(String currentUserId) async {
+  Future<List<String>> getChats(String currentUserId) async {
     List<String> chatIds = [];
 
     try {
@@ -101,24 +101,7 @@ final StreamController<List<Chat>> _chatStreamController =
   }
 
 
-  Future<List<Chat>> getChats(String userId) async {
-    // Fetch chats where the current user is the participant
-    // You may need to structure your data to fetch the chats where userId is either userId or recipientId
-    QuerySnapshot<Object?> snapshot =
-        await chatsCollection.where('userId', isEqualTo: userId).get();
 
-    List<Chat> chats = snapshot.docs.map((doc) {
-      return Chat(
-        id: doc.id,
-        userId: doc['userId'],
-        recipientId: doc['recipientId'],
-        lastMessage: doc['lastMessage'],
-        timestamp: (doc['timestamp'] as Timestamp).toDate(),
-      );
-    }).toList();
-
-    return chats;
-  }
 
   Future<void> startChat(String userId, String recipientId, String message) async {
     // Create a new chat document

@@ -1,6 +1,9 @@
+import 'package:blackbox/screens/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -56,7 +59,8 @@ class _HomeScreenState extends State<HomeScreen> {
     Timestamp timestamp = post.get('timestamp') ?? Timestamp.now();
 
     DateTime dateTime = timestamp.toDate();
-    String formattedTime = '${dateTime.hour}:${dateTime.minute}, ${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    String formattedTime = ' ${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    
 
     // Get the current user's ID (replace this with your actual method of getting the user ID)
     final String _currentuserid = FirebaseAuth.instance.currentUser!.uid;
@@ -79,8 +83,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? NetworkImage(profileUrl)
                       : const AssetImage('assets/profile.jpg') as ImageProvider<Object>,
                 ),
-                title: Text('$ownerId'), // Replace with the owner's name
-                subtitle: Text(formattedTime),
+                title: GestureDetector(child: Text('$ownerId'),onTap: () {
+                  Get.to(ProfileScreen(userId: uid));
+                },), // Replace with the owner's name
+                subtitle: Text( DateFormat('hh:mm a').format(dateTime).toString() + formattedTime),
                 trailing: _currentuserid == uid
                     ? IconButton(
                         icon: Icon(Icons.delete),
