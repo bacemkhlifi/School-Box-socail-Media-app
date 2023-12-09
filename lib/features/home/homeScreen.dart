@@ -30,7 +30,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return RefreshIndicator(
       onRefresh: _refreshPosts,
       child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('posts').orderBy('timestamp', descending: true).snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('posts')
+            .orderBy('timestamp', descending: true)
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(
@@ -58,116 +61,143 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget buildPostCard(DocumentSnapshot post) {
-  String text = post.get('text') ?? '';
-  String ownerId = post.get('userName') ?? '';
-  String uid = post.get('userId') ?? '';
-  Timestamp timestamp = post.get('timestamp') ?? Timestamp.now();
+    String text = post.get('text') ?? '';
+    String ownerId = post.get('userName') ?? '';
+    String uid = post.get('userId') ?? '';
+    String imageUrl = post.get('imageUrl') ??
+        ''; // Assuming 'imageUrl' is the field storing post image URL
 
-  DateTime dateTime = timestamp.toDate();
-  String formattedTime = ' ${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    Timestamp timestamp = post.get('timestamp') ?? Timestamp.now();
 
-  // Get the current user's ID (replace this with your actual method of getting the user ID)
-  final String _currentuserid = FirebaseAuth.instance.currentUser!.uid;
+    DateTime dateTime = timestamp.toDate();
+    String formattedTime =
+        ' ${dateTime.day}/${dateTime.month}/${dateTime.year}';
 
-  return FutureBuilder<String>(
-    future: getProfileUrl(uid),
-    builder: (context, snapshot) {
-      String profileUrl = snapshot.data ?? ''; // Use an empty string if profileUrl is null
+    // Get the current user's ID (replace this with your actual method of getting the user ID)
+    final String _currentuserid = FirebaseAuth.instance.currentUser!.uid;
 
-      return Card(
-        margin: EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ListTile(
-              leading: CircleAvatar(
-                radius: 40,
-                // Use the user's profile picture from the loaded data
-                backgroundImage: profileUrl.isNotEmpty
-                    ? NetworkImage(profileUrl)
-                    : const AssetImage('assets/profile.jpg') as ImageProvider<Object>,
+    return FutureBuilder<String>(
+      future: getProfileUrl(uid),
+      builder: (context, snapshot) {
+        String profileUrl =
+            snapshot.data ?? ''; // Use an empty string if profileUrl is null
+
+        return Card(
+          margin: EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListTile(
+                leading: CircleAvatar(
+                  radius: 40,
+                  // Use the user's profile picture from the loaded data
+                  backgroundImage: profileUrl.isNotEmpty
+                      ? NetworkImage(profileUrl)
+                      : const AssetImage('assets/profile.jpg')
+                          as ImageProvider<Object>,
+                ),
+                title: GestureDetector(
+                  child: Text('$ownerId'),
+                  onTap: () {
+                    Get.to(ProfileScreen(userId: uid));
+                  },
+                ), // Replace with the owner's name
+                subtitle: Text(
+                  DateFormat('hh:mm a').format(dateTime).toString() +
+                      formattedTime,
+                ),
+                trailing: _currentuserid == uid
+                    ? IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          // Implement logic to delete the post from Firestore
+                          FirebaseFirestore.instance
+                              .collection('posts')
+                              .doc(post.id)
+                              .delete();
+                        },
+                      )
+                    : null,
               ),
-              title: GestureDetector(
-                child: Text('$ownerId'),
-                onTap: () {
-                  Get.to(ProfileScreen(userId: uid));
-                },
-              ), // Replace with the owner's name
-              subtitle: Text(
-                DateFormat('hh:mm a').format(dateTime).toString() + formattedTime,
+              if (imageUrl.isNotEmpty)
+                Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      constraints: BoxConstraints(
+                          maxHeight: 450.0), // Set your desired max height
+                      child: Image.network(
+                        imageUrl,
+                        width: double.infinity,
+                        height: 200, // Set height as per your requirement
+                        fit: BoxFit.cover,
+                      ),
+                    )),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  text,
+                  style: TextStyle(fontSize: 16.0),
+                ),
               ),
-              trailing: _currentuserid == uid
-                  ? IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () {
-                        // Implement logic to delete the post from Firestore
-                        FirebaseFirestore.instance.collection('posts').doc(post.id).delete();
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        // Handle like button tap (toggle color, update like count, etc.)
+                        favoriteController.toggleFavorite(
+                            post.id, _currentuserid);
                       },
-                    )
-                  : null,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                text,
-                style: TextStyle(fontSize: 16.0),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      // Handle like button tap (toggle color, update like count, etc.)
-                      favoriteController.toggleFavorite(post.id,_currentuserid);
-                    },
-                    child: Obx(
-                      () => Icon(
-                        favoriteController.isFavorite(post.id,_currentuserid)
-                            ? Icons.favorite
-                            : Icons.favorite_border,
-                        color: Colors.red,
+                      child: Obx(
+                        () => Icon(
+                          favoriteController.isFavorite(post.id, _currentuserid)
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: Colors.red,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 8),
-                  FutureBuilder<int>(
-                    // Fetch like count from the database
-                    future: getLikeCountFromDatabase(post.id),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      } else {
-                        int likeCount = snapshot.data ?? 0;
+                    SizedBox(width: 8),
+                    FutureBuilder<int>(
+                      // Fetch like count from the database
+                      future: getLikeCountFromDatabase(post.id),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else {
+                          int likeCount = snapshot.data ?? 0;
 
-                      return  GestureDetector(
-  child: Text('$likeCount Likes'),
-  onTap: () async {
-    List<String> userIds = await favoriteController.getLikesList(post.id);
-    showLikeListBottomSheet(context, userIds);
-  },
-);
-
-                      }
-                    },
-                  ),
-                  // Replace with actual like count
-                ],
+                          return GestureDetector(
+                            child: Text('$likeCount Likes'),
+                            onTap: () async {
+                              List<String> userIds = await favoriteController
+                                  .getLikesList(post.id);
+                              showLikeListBottomSheet(context, userIds);
+                            },
+                          );
+                        }
+                      },
+                    ),
+                    // Replace with actual like count
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
+            ],
+          ),
+        );
+      },
+    );
+  }
 
- Future<int> getLikeCountFromDatabase(String postId) async {
+  Future<int> getLikeCountFromDatabase(String postId) async {
     try {
       // Replace 'posts' with the actual collection name where posts are stored
       DocumentSnapshot<Map<String, dynamic>> postSnapshot =
-          await FirebaseFirestore.instance.collection('posts').doc(postId).get();
+          await FirebaseFirestore.instance
+              .collection('posts')
+              .doc(postId)
+              .get();
 
       if (postSnapshot.exists) {
         // Access the 'likes' field in the post document
@@ -183,13 +213,15 @@ class _HomeScreenState extends State<HomeScreen> {
       return 0; // You can return a default value or handle this case differently
     }
   }
+
   Future<String> getProfileUrl(String uid) async {
     try {
       DocumentSnapshot userSnapshot =
           await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
       if (userSnapshot.exists) {
-        return userSnapshot.get('profile_picture') ?? ''; // Replace with your field name for the profile URL
+        return userSnapshot.get('profile_picture') ??
+            ''; // Replace with your field name for the profile URL
       } else {
         // User with the given UID not found
         return ''; // or throw an exception, handle it based on your app's logic
@@ -200,7 +232,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 }
-
 
 class LikeListBottomSheet extends StatelessWidget {
   final List<String> userIds;
