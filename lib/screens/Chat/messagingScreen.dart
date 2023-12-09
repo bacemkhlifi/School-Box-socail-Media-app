@@ -87,7 +87,51 @@ class _ChatScreenState extends State<ChatScreen> {
               return ListView.builder(
                 itemCount: chats.length,
                 itemBuilder: (context, index) {
-                  return FutureBuilder<UserProfile>(
+                  return 
+                  
+                  widget.userId == chats[index].recipientId ? 
+                  FutureBuilder<UserProfile>(
+                    future: getUserProfile(chats[index].senderId),
+                    builder: (context, userProfileSnapshot) {
+                      if (userProfileSnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return ListTile(
+                          title: Text('Loading...'),
+                          // You can add more widgets or loading indicators here
+                        );
+                      } else if (userProfileSnapshot.hasError) {
+                        return ListTile(
+                          title: Text(
+                              'Error: ${userProfileSnapshot.error.toString()}'),
+                        );
+                      } else {
+                        UserProfile userProfile = userProfileSnapshot.data!;
+                        return   ListTile(
+                         
+                          leading: CircleAvatar(
+                            // Replace with user's profile picture
+                            backgroundImage:
+                                NetworkImage(userProfile.profilePicture),
+                          ),
+                          title: Text(userProfile.userName),
+                          subtitle: Text(chats[index].lastMessage),
+                          onTap: () {
+                            // Navigate to the chat details screen
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChatDetailsScreen(
+                                  selectedUser: chats[index].senderId,
+                                  userId: widget.userId,
+                                  name: userProfile.userName,
+                                ),
+                              ),
+                            );
+                          },
+                        ); 
+                      }
+                    },
+                  ) :  FutureBuilder<UserProfile>(
                     future: getUserProfile(chats[index].recipientId),
                     builder: (context, userProfileSnapshot) {
                       if (userProfileSnapshot.connectionState ==
@@ -103,7 +147,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         );
                       } else {
                         UserProfile userProfile = userProfileSnapshot.data!;
-                        return ListTile(
+                        return   ListTile(
+                         
                           leading: CircleAvatar(
                             // Replace with user's profile picture
                             backgroundImage:
@@ -124,7 +169,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               ),
                             );
                           },
-                        );
+                        ) ;
                       }
                     },
                   );

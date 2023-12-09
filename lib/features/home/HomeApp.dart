@@ -75,7 +75,7 @@ class _HomeAppState extends State<HomeApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:const  Text('SchoolBox'),
+        title:const  Text('BlackBox'),
         actions: [
           IconButton(
           color: Get.isDarkMode ? primaryClr : darkGreyClr,

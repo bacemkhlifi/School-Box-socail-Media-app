@@ -37,6 +37,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
     await chatRef.set({
       'lastMessage': {
         'recipientId': widget.selectedUser,
+        'senderId': widget.userId,
         'text': message,
         'timestamp': FieldValue.serverTimestamp(),
       },
