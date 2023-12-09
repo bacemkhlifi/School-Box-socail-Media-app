@@ -151,40 +151,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Column(
                               children: [
                                 Text(
-                                  _userData['posts']?.toString() ?? '0',
+                                  _userData['email']?.toString() ?? '',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Text('Posts'),
+                                //Text('Posts'),
                               ],
-                            ),
-                            SizedBox(width: 16),
-                            Column(
-                              children: [
-                                Text(
-                                  _userData['followers']?.toString() ?? '0',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text('Followers'),
-                              ],
-                            ),
-                            SizedBox(width: 16),
-                            Column(
-                              children: [
-                                Text(
-                                  _userData['following']?.toString() ?? '0',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text('Following'),
-                              ],
+                           
                             ),
                           ],
                         ),
@@ -229,22 +204,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   }
 
                   List<DocumentSnapshot> posts = snapshot.data!.docs;
-                  return posts.isNotEmpty ? ListView.builder(
-  shrinkWrap: true,
-  physics: NeverScrollableScrollPhysics(),
-  itemCount: posts.length,
-  itemBuilder: (context, index) {
-    final reversedIndex = posts.length - 1 - index;
-    return buildPublication(widget.userId, posts[reversedIndex]);
-  },
-  // Check if there are no posts
-  )
-      : const Center(
-          child: Text('No posts yet.'),
-        );
-   
-
-
+                  return posts.isNotEmpty
+                      ? ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: posts.length,
+                          itemBuilder: (context, index) {
+                            final reversedIndex = posts.length - 1 - index;
+                            return buildPublication(
+                                widget.userId, posts[reversedIndex]);
+                          },
+                          // Check if there are no posts
+                        )
+                      : const Center(
+                          child: Text('No posts yet.'),
+                        );
                 },
               ),
             ],
@@ -310,15 +284,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (imageUrl.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    constraints: BoxConstraints(
-                      maxHeight: 450.0,
-                    ),
-                    child: Image.network(
-                      imageUrl,
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
+                  child: GestureDetector(
+                    onTap: () {
+                      // Show bottom sheet with full-size image
+
+                      showModalBottomSheet(
+                        isScrollControlled: true,
+                        context: context,
+                        builder: (BuildContext context) {
+                          return SizedBox(
+                            width: double.infinity,
+                            height: MediaQuery.of(context).size.height * 0.8,
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.close),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    child: Image.network(
+                                      imageUrl,
+                                      width: double.infinity,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    child: Container(
+                      constraints: BoxConstraints(
+                        maxHeight: 450.0,
+                      ),
+                      child: Image.network(
+                        imageUrl,
+                        width: double.infinity,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),

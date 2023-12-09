@@ -121,17 +121,59 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               if (imageUrl.isNotEmpty)
                 Padding(
-                    padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      // Show bottom sheet with full-size image
+
+                      showModalBottomSheet(
+                        isScrollControlled: true,
+                        context: context,
+                        builder: (BuildContext context) {
+                          return SizedBox(
+                            width: double.infinity,
+                            height: MediaQuery.of(context).size.height * 0.8,
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.close),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    child: Image.network(
+                                      imageUrl,
+                                      width: double.infinity,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
                     child: Container(
                       constraints: BoxConstraints(
-                          maxHeight: 450.0), // Set your desired max height
+                        maxHeight: 450.0,
+                      ),
                       child: Image.network(
                         imageUrl,
                         width: double.infinity,
-                        height: 200, // Set height as per your requirement
+                        height: 200,
                         fit: BoxFit.cover,
                       ),
-                    )),
+                    ),
+                  ),
+                ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
